@@ -1,30 +1,15 @@
 import json
 import os
-
+import dotenv
 import requests
 import streamlit as st
-
 from .base import AIModel
-
+from .openrouter_models import OPEN_ROUTER_AVAILABLE_MODELS
+dotenv.load_dotenv()
 
 class OpenRouterModel(AIModel):
     """OpenRouter Model Implementation."""
-    AVAILABLE_MODELS = {
-        "anthropic/claude-3-opus": "Claude 3 Opus (Most Powerful)",
-        "anthropic/claude-3-sonnet": "Claude 3 Sonnet (Balanced)",
-        "anthropic/claude-3-haiku": "Claude 3 Haiku (Fast)",
-        "openai/gpt-4o": "GPT-4o (Vision Capable)",
-        "openai/gpt-4-vision": "GPT-4 Vision (Specialized Vision)",
-        "google/gemini-pro-vision": "Gemini Pro Vision (Google's Vision Model)",
-        "meta-llama/llama-3-70b-instruct": "Llama 3 70B (Open Source, Powerful)",
-        "meta-llama/llama-3.1-405b-vision": "Llama 3.1 405B Vision (Vision Capable)",
-        "qwen/qwq-32b:free": "Qwen QwQ 32b (Reasoning model, Free)",
-        "meta-llama/llama-3-8b-instruct:free": "Llama 3 8B Instruct (Free)",
-        "mistralai/mistral-7b-instruct:free": "Mistral 7B Instruct (Free)",
-        "openchat/openchat-7b:free": "OpenChat 7B (Free)",
-        "google/gemma-7b-it:free": "Gemma 7B IT (Free)"
-    }
-
+    OPEN_ROUTER_AVAILABLE_MODELS = OPEN_ROUTER_AVAILABLE_MODELS
     @classmethod
     def get_free_models(cls):
         free_keys = [
@@ -34,7 +19,7 @@ class OpenRouterModel(AIModel):
             "openchat/openchat-7b:free",
             "google/gemma-7b-it:free"
         ]
-        return {k: v for k, v in cls.AVAILABLE_MODELS.items() if k in free_keys}
+        return {k: v for k, v in cls.OPEN_ROUTER_AVAILABLE_MODELS.items() if k in free_keys}
 
     def __init__(self):
         self.api_key = os.getenv("OPENROUTER_API_KEY")
@@ -44,14 +29,14 @@ class OpenRouterModel(AIModel):
         self.model_name = "anthropic/claude-3-opus"
 
     def set_model(self, model_name):
-        if model_name in self.AVAILABLE_MODELS:
+        if model_name in self.OPEN_ROUTER_AVAILABLE_MODELS:
             self.model_name = model_name
             return True
         return False
 
     @classmethod
     def get_available_models(cls):
-        return cls.AVAILABLE_MODELS
+        return cls.OPEN_ROUTER_AVAILABLE_MODELS
 
     def generate_content(self, inputs):
         if not self.api_key:

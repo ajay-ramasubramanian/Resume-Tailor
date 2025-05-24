@@ -1,46 +1,42 @@
 import json
 import os
 
+import dotenv
 import requests
 import streamlit as st
 
 from .base import AIModel
+from .perplexity_models import PERPLEXITY_AVAILABLE_MODELS
+dotenv.load_dotenv()
 
 
 class PerplexityModel(AIModel):
     """Perplexity Model Implementation."""
-    AVAILABLE_MODELS = {
-        "sonar-medium-online": "Sonar Medium Online (Recommended)",
-        "sonar-small-online": "Sonar Small Online (Faster)",
-        "sonar-large-online": "Sonar Large Online (Most Powerful)",
-        "mixtral-8x7b-instruct": "Mixtral 8x7B (Open Source)",
-        "llama-3-70b-instruct": "Llama 3 70B (Meta)",
-        "codellama-70b-instruct": "CodeLlama 70B (Code Specialized)"
-    }
+    PERPLEXITY_AVAILABLE_MODELS = PERPLEXITY_AVAILABLE_MODELS
 
     def __init__(self):
-        self.api_key = os.getenv("PERPLEXITY_API_KEY")
-        if not self.api_key:
+        self._api_key = os.getenv("PERPLEXITY_API_KEY")
+        if not self._api_key:
             st.error("Perplexity API key is missing. Please set the PERPLEXITY_API_KEY in your environment variables.")
         self.api_url = "https://api.perplexity.ai/chat/completions"
-        self.model_name = "sonar-medium-online"
+        self.model_name = "sonar-low-online"
 
     def set_model(self, model_name):
-        if model_name in self.AVAILABLE_MODELS:
+        if model_name in self.PERPLEXITY_AVAILABLE_MODELS:
             self.model_name = model_name
             return True
         return False
 
     @classmethod
     def get_available_models(cls):
-        return cls.AVAILABLE_MODELS
+        return cls.PERPLEXITY_AVAILABLE_MODELS
 
     def generate_content(self, inputs):
-        if not self.api_key:
+        if not self._api_key:
             return "Error: Perplexity API key is missing"
         system_prompt, image_data, user_prompt = inputs
         headers = {
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {self._api_key}",
             "Content-Type": "application/json"
         }
         payload = {

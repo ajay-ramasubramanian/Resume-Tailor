@@ -1,37 +1,38 @@
 import json
 import os
+from typing import Any, Dict, List, Optional
 
+import dotenv
 import google.generativeai as genai
 import streamlit as st
 
 from .base import AIModel
+from .gemini_models import GEMINI_AVAILABLE_MODELS
 
+dotenv.load_dotenv()
 
 class GeminiModel(AIModel):
     """Google Gemini Model Implementation."""
-    AVAILABLE_MODELS = {
-        "gemini-2.0-flash": "Gemini 2.0 Flash (Fastest)",
-        "gemini-2.0-pro": "Gemini 2.0 Pro (Balanced)",
-        "gemini-2.0-ultra": "Gemini 2.0 Ultra (Most Capable)",
-        "gemini-2.5-flash": "Gemini 2.5 Flash (Latest, Fast)",
-        "gemini-2.5-pro": "Gemini 2.5 Pro (Latest, Balanced)",
-        "gemini-2.0-vision": "Gemini 2.0 Vision (Vision Specialized)"
-    }
+    GEMINI_AVAILABLE_MODELS = GEMINI_AVAILABLE_MODELS
 
     def __init__(self):
-        self.api_key = os.getenv("GOOGLE_API_KEY")
-        if not self.api_key:
+        self._api_key = os.getenv("GOOGLE_API_KEY")
+        if not self._api_key:
             st.error("Google API key is missing. Please set the GOOGLE_API_KEY in your environment variables.")
             return
         self.model_name = "gemini-2.0-flash"
-        genai.configure(api_key=self.api_key)
+        genai.configure(api_key=self._api_key)
         self._refresh_model()
 
     def _refresh_model(self):
-        self.model = genai.GenerativeModel(self.model_name)
+        try:
+            self.model = genai.GenerativeModel(self.model_name)
+        except Exception as e:
+            st.error(f"Failed to initialize Gemini model: {str(e)}")
+            raise
 
     def set_model(self, model_name):
-        if model_name in self.AVAILABLE_MODELS:
+        if model_name in self.GEMINI_AVAILABLE_MODELS:
             self.model_name = model_name
             self._refresh_model()
             return True
@@ -39,10 +40,10 @@ class GeminiModel(AIModel):
 
     @classmethod
     def get_available_models(cls):
-        return cls.AVAILABLE_MODELS
+        return cls.GEMINI_AVAILABLE_MODELS
 
     def generate_content(self, inputs):
-        if not self.api_key:
+        if not self._api_key:
             return "Error: Google API key is missing"
         try:
             response = self.model.generate_content(inputs)
@@ -51,7 +52,7 @@ class GeminiModel(AIModel):
             return f"Error generating content with Gemini: {str(e)}"
 
     def get_json_response(self, inputs):
-        if not self.api_key:
+        if not self._api_key:
             return {"Technical Skills": [], "Analytical Skills": [], "Soft Skills": [], "Missing Skills": [], "Suggestions": []}
         try:
             response = self.model.generate_content(inputs)

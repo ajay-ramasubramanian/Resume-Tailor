@@ -5,10 +5,12 @@ import streamlit as st
 from models import (AIModelFactory, GeminiModel, OpenRouterModel,
                     PerplexityModel)
 from prompts.prompts import (EXECUTIVE_SUMMARY_PROMPT,
-                            KEYWORDS_ANALYSIS_PROMPT, MATCH_PERCENTAGE_PROMPT)
+                             KEYWORDS_ANALYSIS_PROMPT, MATCH_PERCENTAGE_PROMPT,
+                             TAILOR_RESUME_PROMPT)
 from providers.selection import (check_provider_availability,
-                                get_provider_capabilities)
-from utils.cache import get_ai_response, get_ai_response_keywords
+                                 get_provider_capabilities)
+from utils.cache import (get_ai_response, get_ai_response_keywords,
+                         get_ai_response_tailor)
 from utils.pdf_utils import pdf_to_base64_images
 
 st.set_page_config(page_title="ATS Resume Scanner", layout="wide")
@@ -17,7 +19,7 @@ st.header("Application Tracking System")
 # Sidebar for configuration
 with st.sidebar:
     st.header("AI Provider Settings")
-    st.subheader("System Status")
+    st.subheader("API Provider Stats")
     provider_option = st.session_state.get("model_provider", "Google Gemini")
     provider_capabilities = get_provider_capabilities()
     capabilities = provider_capabilities.get(provider_option, {})
@@ -56,14 +58,8 @@ with st.sidebar:
         st.session_state.model_provider = provider_option
     st.subheader("API Key Configuration")
     if provider_option == "Google Gemini":
-        gemini_api_key = st.text_input(
-            "Google Gemini API Key", 
-            value=os.getenv("GOOGLE_API_KEY", ""), 
-            type="password",
-            help="Enter your Google Gemini API key. Leave blank to use the key from .env file."
-        )
-        if gemini_api_key:
-            os.environ["GOOGLE_API_KEY"] = gemini_api_key
+        if not os.getenv("GOOGLE_API_KEY"):
+            st.error("Google API key is missing. Please set GOOGLE_API_KEY in your .env file.")
         gemini_models = GeminiModel.get_available_models()
         model_keys = list(gemini_models.keys())
         model_names = list(gemini_models.values())
@@ -80,14 +76,8 @@ with st.sidebar:
             model_instance = AIModelFactory.get_model("Google Gemini")
             model_instance.set_model(selected_model_key)
     elif provider_option == "OpenRouter":
-        openrouter_api_key = st.text_input(
-            "OpenRouter API Key", 
-            value=os.getenv("OPENROUTER_API_KEY", ""), 
-            type="password",
-            help="Enter your OpenRouter API key. Leave blank to use the key from .env file."
-        )
-        if openrouter_api_key:
-            os.environ["OPENROUTER_API_KEY"] = openrouter_api_key
+        if not os.getenv("OPENROUTER_API_KEY"):
+            st.error("OpenRouter API key is missing. Please set OPENROUTER_API_KEY in your .env file.")
         openrouter_models = OpenRouterModel.get_available_models()
         model_keys = list(openrouter_models.keys())
         model_names = list(openrouter_models.values())
@@ -105,14 +95,8 @@ with st.sidebar:
             model_instance.set_model(selected_model_key)
         st.info("OpenRouter allows you to access various AI models through a single API. Some models support vision capabilities better than others.")
     elif provider_option == "Perplexity":
-        perplexity_api_key = st.text_input(
-            "Perplexity API Key", 
-            value=os.getenv("PERPLEXITY_API_KEY", ""), 
-            type="password",
-            help="Enter your Perplexity API key. Leave blank to use the key from .env file."
-        )
-        if perplexity_api_key:
-            os.environ["PERPLEXITY_API_KEY"] = perplexity_api_key
+        if not os.getenv("PERPLEXITY_API_KEY"):
+            st.error("Perplexity API key is missing. Please set PERPLEXITY_API_KEY in your .env file.")
         perplexity_models = PerplexityModel.get_available_models()
         model_keys = list(perplexity_models.keys())
         model_names = list(perplexity_models.values())
@@ -130,7 +114,7 @@ with st.sidebar:
             model_instance.set_model(selected_model_key)
         st.warning("Note: Perplexity API doesn't directly support image input. Resume analysis will be limited with this provider.")
     st.info("""
-    You can set your API keys permanently by adding them to a .env file:
+    Set your API keys in a .env file:
     ```
     GOOGLE_API_KEY=your_key_here
     OPENROUTER_API_KEY=your_key_here
@@ -194,13 +178,15 @@ if selected_model_name:
     st.caption(f"Using AI Provider: {provider} | Model: {selected_model_name}")
 else:
     st.caption(f"Using AI Provider: {provider}")
-col1, col2, col3 = st.columns(3, gap="medium")
+col1, col2, col3, col4 = st.columns(4, gap="medium")
 with col1:
     submit1 = st.button("Tell Me About the Resume")
 with col2:
     submit2 = st.button("Get Keywords")
 with col3:
     submit3 = st.button("Percentage match")
+with col4:
+    submit4 = st.button("Tailor Resume")
 if submit1:
     if not st.session_state.resume:
         st.error("Please upload a resume before analyzing")
@@ -309,3 +295,62 @@ elif submit3:
             except Exception:
                 pass
             st.write(response)
+elif submit4:
+    if not st.session_state.resume:
+        st.error("Please upload a resume before getting tailoring suggestions")
+        st.stop()
+    if not input_text:
+        st.error("Please provide a job description to tailor your resume effectively")
+        st.stop()
+    available, message = check_provider_availability(st.session_state.model_provider)
+    if not available:
+        st.error(f"Provider configuration issue: {message}")
+        st.info("Please check your API key in the sidebar settings")
+        st.stop()
+    with st.spinner(f"Generating resume tailoring suggestions using {st.session_state.model_provider}..."):
+        pdf_content = pdf_to_base64_images(st.session_state.resume)
+        response = get_ai_response_tailor(TAILOR_RESUME_PROMPT, pdf_content, input_text, st.session_state.model_provider)
+        if isinstance(response, str) and response.startswith("Error:"):
+            st.error(response)
+        else:
+            st.subheader("🎯 Resume Tailoring Recommendations")
+            st.success("✨ **Great news!** Your resume has strong potential. Here are personalized suggestions to optimize it for this specific role and boost your ATS compatibility!")
+            
+            # Display the tailored recommendations in an expandable format
+            with st.expander("📋 Complete Tailoring Guide", expanded=True):
+                st.markdown(response)
+            
+            # Add helpful tips section
+            with st.expander("💡 Quick Implementation Tips", expanded=False):
+                st.markdown("""
+                ### How to Use These Suggestions:
+                
+                **🚀 Start with Quick Wins:**
+                - Focus on the bullet point transformations first - these have immediate impact
+                - Update your skills section with the recommended keywords
+                - Revise your professional summary to include key terms
+                
+                **📝 Implementation Strategy:**
+                1. **Copy your current resume** to a new document
+                2. **Apply transformations one by one** - don't rush the process
+                3. **Read each section aloud** to ensure it sounds natural
+                4. **Keep the original meaning** of your achievements intact
+                
+                **✅ Quality Check:**
+                - Ensure all new keywords are truthful and reflect your actual experience
+                - Maintain consistency in terminology throughout your resume
+                - Keep bullet points concise and impactful
+                - Verify that industry-specific terms are used correctly
+                
+                **🎯 Remember:**
+                - These suggestions enhance your existing story, not create a new one
+                - Focus on highlighting transferable skills you actually possess
+                - Tailor the suggestions further for each specific job application
+                """)
+            
+            # Add encouragement section
+            st.info("💪 **You've got this!** These optimizations will significantly improve your resume's performance with both ATS systems and human recruiters. Take your time implementing these changes - quality over speed!")
+            
+            # Add download suggestion
+            st.markdown("---")
+            st.markdown("**💾 Pro Tip:** Save these recommendations and refer back to them when applying to similar roles. Many of these optimizations can be reused for positions in the same field!")
