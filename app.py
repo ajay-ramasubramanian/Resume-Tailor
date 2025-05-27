@@ -13,8 +13,8 @@ from utils.cache import (get_ai_response, get_ai_response_keywords,
                          get_ai_response_tailor)
 from utils.pdf_utils import pdf_to_base64_images
 
-st.set_page_config(page_title="ATS Resume Scanner", layout="wide")
-st.header("Application Tracking System")
+st.set_page_config(page_title="Resume Tailor/Analyzer", layout="wide")
+st.header("Resume Tailor/Analyzer")
 
 # Sidebar for configuration
 with st.sidebar:
