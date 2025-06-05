@@ -220,40 +220,14 @@ elif submit2:
     with st.spinner(f"Extracting keywords using {st.session_state.model_provider}..."):
         pdf_content = pdf_to_base64_images(st.session_state.resume)
         response = get_ai_response_keywords(KEYWORDS_ANALYSIS_PROMPT, pdf_content, input_text, st.session_state.model_provider)
-        if response is not None:
-            st.subheader("Skills Analysis:")
-            error_detected = False
-            if "Suggestions" in response and response["Suggestions"]:
-                for suggestion in response["Suggestions"]:
-                    if isinstance(suggestion, str) and suggestion.startswith("Error:"):
-                        st.error(suggestion)
-                        error_detected = True
-                        break
-            if not error_detected:
-                with st.expander("Technical Skills", expanded=True):
-                    if "Technical Skills" in response and response["Technical Skills"]:
-                        st.write(f"{', '.join(response['Technical Skills'])}")
-                    else:
-                        st.info("No technical skills identified")
-                with st.expander("Analytical Skills", expanded=True):
-                    if "Analytical Skills" in response and response["Analytical Skills"]:
-                        st.write(f"{', '.join(response['Analytical Skills'])}")
-                    else:
-                        st.info("No analytical skills identified")
-                with st.expander("Soft Skills", expanded=True):
-                    if "Soft Skills" in response and response["Soft Skills"]:
-                        st.write(f"{', '.join(response['Soft Skills'])}")
-                    else:
-                        st.info("No soft skills identified")
-                if "Missing Skills" in response and response["Missing Skills"]:
-                    with st.expander("Missing Skills", expanded=True):
-                        st.write(f"{', '.join(response['Missing Skills'])}")
-                if "Suggestions" in response and response["Suggestions"]:
-                    with st.expander("Improvement Suggestions", expanded=True):
-                        for suggestion in response["Suggestions"]:
-                            st.write(f"• {suggestion}")
+        if isinstance(response, str) and response.startswith("Error:"):
+            st.error(response)
         else:
-            st.error("Failed to extract keywords from the resume")
+            st.subheader("Keywords Analysis")
+            
+            # Display the keyword analysis in an expandable format
+            with st.expander("📋 Complete Keyword Analysis", expanded=True):
+                st.markdown(response)
 elif submit3:
     if not st.session_state.resume:
         st.error("Please upload a resume before calculating match percentage")
