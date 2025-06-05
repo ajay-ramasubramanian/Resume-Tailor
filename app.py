@@ -182,9 +182,9 @@ col1, col2, col3, col4 = st.columns(4, gap="medium")
 with col1:
     submit1 = st.button("Tell Me About the Resume")
 with col2:
-    submit2 = st.button("Get Keywords")
+    submit2 = st.button("Keywords Extractor")
 with col3:
-    submit3 = st.button("Percentage match")
+    submit3 = st.button("ATS score")
 with col4:
     submit4 = st.button("Tailor Resume")
 if submit1:
