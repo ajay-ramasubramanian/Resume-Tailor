@@ -5,12 +5,12 @@ import streamlit as st
 from models import (AIModelFactory, GeminiModel, OpenRouterModel,
                     PerplexityModel)
 from prompts.prompts import (EXECUTIVE_SUMMARY_PROMPT,
-                             KEYWORDS_ANALYSIS_PROMPT, MATCH_PERCENTAGE_PROMPT,
-                             TAILOR_RESUME_PROMPT)
+                            KEYWORDS_ANALYSIS_PROMPT, MATCH_PERCENTAGE_PROMPT,
+                            TAILOR_RESUME_PROMPT)
 from providers.selection import (check_provider_availability,
-                                 get_provider_capabilities)
+                                get_provider_capabilities)
 from utils.cache import (get_ai_response, get_ai_response_keywords,
-                         get_ai_response_tailor)
+                        get_ai_response_tailor)
 from utils.pdf_utils import pdf_to_base64_images
 
 st.set_page_config(page_title="Resume Tailor/Analyzer", layout="wide")

@@ -18,10 +18,13 @@ A Streamlit web application that leverages multiple AI providers to analyze resu
 - **Keyword Analysis**: Technical, analytical, and soft skills extraction with JSON output
 
 ### 🎨 **Modern User Experience**
-- **Interactive Sidebar**: Real-time provider status and model selection
+- **Interactive Sidebar**: Real-time provider status, model selection, and capability ratings
 - **Progress Indicators**: Live analysis feedback with provider-specific messaging
 - **Responsive Design**: Wide layout optimized for professional use
 - **Extensible UI**: Component-based architecture for future enhancements
+- **Enhanced Analysis Display**: Expandable sections with detailed insights
+- **Visual Match Scoring**: Color-coded metrics for quick assessment
+- **Implementation Guidance**: Step-by-step tips for resume optimization
 
 ### 🛡️ **Enterprise-Grade Architecture**
 - **Factory Pattern**: Modular AI provider management
@@ -57,8 +60,7 @@ Application-Tracking-System/
 │   ├── __init__.py
 │   ├── cache.py              # Response caching system
 │   └── pdf_utils.py          # PDF processing utilities
-└── tests/                     # Test suite (optional)
-    └── __pycache__/
+
 ```
 
 ## 🚀 Installation & Setup
@@ -137,24 +139,31 @@ streamlit run app.py
 - Strengths and weaknesses analysis
 - Professional hiring recommendation
 - Interview question suggestions
+- Expandable detailed analysis view
 
-#### 2. 🎯 **Get Keywords**
-- Structured JSON output of skills extraction
+#### 2. 🎯 **Keywords Extractor**
+- Extracts all the relevant keywords from the Job description
 - Technical, analytical, and soft skills categorization
 - Missing keywords identification
 - Optimization suggestions
+- Expandable keyword analysis view
 
-#### 3. 📊 **Percentage Match**
+#### 3. 📊 **ATS Score**
 - Quantitative scoring (0-100%)
 - Weighted category analysis
 - Detailed gap assessment
 - Evidence-based recommendations
+- Visual match indicators (Strong/Potential/Conditional/Not Recommended)
+- Color-coded metrics for quick assessment
 
 #### 4. ✨ **Tailor Resume**
 - Before/after bullet point transformations
 - Strategic keyword integration
 - ATS optimization guidance
 - Implementation roadmap
+- Quick implementation tips
+- Step-by-step optimization guide
+- Quality check recommendations
 
 ## 🎛️ Advanced Configuration
 
@@ -163,12 +172,17 @@ streamlit run app.py
 **For Resume Parsing & Analysis:**
 - **Best Overall**: OpenRouter with Claude 3 Opus
 - **Fastest**: Google Gemini 2.5 Flash
-- **Most Cost-Effective**: OpenRouter free models (Qwen QwQ 32b )
+- **Most Cost-Effective**: OpenRouter free models (Qwen QwQ 32b)
 - **Latest Technology**: Gemini 2.5 Pro Preview
+
+**Provider Capabilities:**
+- **Google Gemini**: Excellent analysis, Fast speed, Low cost
+- **OpenRouter**: Excellent analysis, Model-dependent vision, Medium speed/cost
+- **Perplexity**: Good analysis, Limited vision, Medium speed, Low cost
 
 **For Different Use Cases:**
 - **Technical Resumes**: Models with strong coding analysis (GPT-4o, Claude 3)
-- **Executive Positions**: Advanced reasoning models (Claude 3 Opus, Gemini 2.5 Pro)
+- **Executive Positions**: Advanced reasoning models (Claude 3 Opus, Gemini 2.5 Flash)
 - **Quick Screening**: Fast models (Gemini 2.0 Flash, Sonar)
 
 ### Performance Optimization
